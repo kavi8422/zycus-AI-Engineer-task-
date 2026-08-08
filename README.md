@@ -1,119 +1,84 @@
-# US Delivery Internship — Starter Dataset
+# Zycus AI Engineer Intern — Task Submission
 
-This repository contains the mock dataset for the **US Delivery Internship Technical Task Round**.  
-Candidates should use this data exclusively for their submissions.
+AI-powered support ticket triage and account health summarization system, built with Python and Google Gemini.
 
----
+## Setup
 
-## Repository Structure
-
+1. Clone this repo and navigate into it:
 ```
-starter-repo/
-├── data/
-│   ├── tickets.json          # 500 synthetic support tickets
-│   └── accounts.json         # 50 synthetic customer account summaries
-├── knowledge-base/
-│   ├── products/
-│   │   ├── databridge-pro.md
-│   │   ├── cloudsync.md
-│   │   ├── analyticshub.md
-│   │   ├── securevault.md
-│   │   └── workflowengine.md
-│   ├── troubleshooting/
-│   │   ├── authentication-sso.md
-│   │   └── performance-and-integrations.md
-│   ├── billing/
-│   │   └── billing-and-plans.md
-│   └── onboarding/
-│       └── onboarding-guide.md
-└── DATA_SCHEMA.md            # Field-level schema documentation
+   git clone https://github.com/kavi8422/zycus-AI-Engineer-task-.git
+   cd zycus-AI-Engineer-task-
 ```
 
----
+2. Create a virtual environment and activate it:
+```
+   python -m venv venv
+   venv\Scripts\activate   # Windows
+   source venv/bin/activate   # Mac/Linux
+```
 
-## Data Description
+3. Install dependencies:
+```
+   pip install google-genai python-dotenv
+```
 
-### `data/tickets.json`
+4. Create a `.env` file in the project root (see `.env.example`) with your own Google Gemini API key:
+```
+   GOOGLE_API_KEY=your_key_here
+```
+   Get a free key at https://aistudio.google.com/apikey
 
-500 synthetic support tickets submitted by fictitious enterprise customers. Each ticket represents a realistic interaction between a customer and the technical support team.
+## How to Run
 
-**Key fields:**
+**Task 1 — Ticket Triage:**
+```
+python task1_triage.py
+```
+Classifies a sample ticket into product area, category, and urgency (P1–P4), matches it against the knowledge base, and drafts a first-response reply.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `ticket_id` | string | Unique ticket identifier (e.g., `TKT-10042`) |
-| `account_id` | string | Links to an account in `accounts.json` |
-| `company` | string | Customer company name |
-| `subject` | string | Ticket subject line |
-| `body` | string | Full ticket body text |
-| `product` | string | Product the ticket relates to |
-| `product_area` | string | Module within the product |
-| `category` | string | Issue type: Bug, Feature Request, How-To, Performance, Billing, Integration, Onboarding, Data Loss |
-| `urgency` | string | P1 (critical) to P4 (low) |
-| `status` | string | Open, In Progress, Pending Customer, Resolved, Closed |
-| `plan_tier` | string | Starter, Professional, Business, Enterprise |
-| `assigned_agent` | string | Support agent name |
-| `created_at` | ISO 8601 | Ticket creation timestamp |
-| `updated_at` | ISO 8601 | Last update timestamp |
-| `tags` | array | Free-form tags |
-| `channel` | string | Submission channel: email, portal, chat, phone |
-| `satisfaction_score` | int\|null | CSAT score 1–5, or null if not submitted |
+**Task 2 — Account Health Summary:**
+```
+python task2_summary.py
+```
+Generates an executive summary, risk flags (with quoted evidence), and talking points for a sample customer account.
 
-See [DATA_SCHEMA.md](DATA_SCHEMA.md) for full schema with examples.
+**Task 3 — Evaluation Harness:**
+```
+python task3_evals.py
+```
+Runs 10 automated test cases (5 per task, including one adversarial case each) and saves results to `eval_report.json`.
 
----
+## Sample Output
 
-### `data/accounts.json`
+Task 1 (triage) returns structured JSON like:
+```json
+{
+  "product_area": "DataBridge Pro",
+  "category": "Feature Request",
+  "urgency": "P3",
+  "reasoning": "...",
+  "matched_kb_source": null,
+  "recommended_team": "DataBridge Pro Product Team",
+  "draft_reply": "..."
+}
+```
 
-50 synthetic customer account summaries, each representing a fictional enterprise customer's relationship with the platform.
+Task 3 (evals) produces a report like:
+```json
+{
+  "summary": "10/10 tests passed",
+  "results": [...]
+}
+```
 
-**Key fields:**
+## Design Note
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `account_id` | string | Unique account identifier |
-| `company` | string | Company name |
-| `tam` | string | Assigned Technical Account Manager |
-| `plan_tier` | string | Current plan |
-| `arr_usd` | int | Annual recurring revenue in USD |
-| `seats_licensed` | int | Number of licensed seats |
-| `seats_active` | int | Seats with activity in last 30 days |
-| `products` | array | Products in use |
-| `health_status` | string | Healthy, At Risk, Churning, or New |
-| `usage_trend` | string | Increasing, Stable, Declining, or Inactive |
-| `open_tickets` | int | Currently open support tickets |
-| `p1_tickets_last_30d` | int | P1 tickets in last 30 days |
-| `renewal_date` | YYYY-MM-DD | Contract renewal date |
-| `last_qbr_date` | YYYY-MM-DD | Date of last Quarterly Business Review |
-| `escalation_notes` | array | Free-text escalation observations |
-| `nps_score` | int\|null | Net Promoter Score 1–10, or null |
-| `primary_contact` | object | `name` and `title` of main contact |
-| `integrations_active` | array | Active third-party integrations |
-| `region` | string | Geographic region |
-| `industry` | string | Customer industry vertical |
+See [DESIGN_NOTE.md](DESIGN_NOTE.md) for a discussion of failure modes, the latency/quality
+trade-off made, PII handling, and scaling considerations.
 
----
+## Notes
 
-### `knowledge-base/`
-
-Markdown documentation files representing a product knowledge base. These docs contain:
-
-- Product feature descriptions and configuration references
-- Common error codes and their meanings
-- Step-by-step troubleshooting guides
-- Plan limits and pricing information
-- Onboarding checklists and training paths
-
-Candidates should use these docs as the retrieval corpus for knowledge-base lookup features.
-
----
-
-## Usage Notes
-
-- All data is **entirely synthetic**. Company names, contact details, and ticket content are fictional.
-- Ticket `account_id` values do not always match an entry in `accounts.json` — this is intentional. Handle missing account lookups gracefully.
-- The `escalation_notes` field in accounts contains plain-text observations. These are designed to test churn-risk signal detection.
-- Some tickets are deliberately ambiguous in category or urgency — this tests edge-case handling.
-
----
-
+- Uses Google Gemini (`gemini-flash-latest`) via the free tier.
+- Free tier is rate-limited to 5 requests/minute — `task3_evals.py` includes automatic
+  retry-with-backoff and spacing between calls to handle this gracefully.
+- All data used is the synthetic dataset provided in this repo (`data/`, `knowledge-base/`).
